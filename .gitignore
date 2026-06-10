@@ -1,0 +1,16 @@
+# Local environment variables containing API keys
+.env
+
+# Python virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local conversation storage
+history.json

@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sirivela - Intelligent Voice Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0d19;
+            --bg-secondary: rgba(22, 28, 45, 0.4);
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --accent-primary: #7c3aed; /* Violet */
+            --accent-secondary: #06b6d4; /* Cyan */
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --glow-color: rgba(124, 58, 237, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* App Container */
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: space-between;
+        }
+
+        /* Header styling */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.025em;
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+            stroke: var(--accent-secondary);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+            box-shadow: 0 0 8px var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.ready .status-dot {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .status-badge.listening .status-dot {
+            background-color: var(--danger);
+            box-shadow: 0 0 12px var(--danger);
+            animation: pulse-red 1.2s infinite alternate;
+        }
+
+        .status-badge.thinking .status-dot {
+            background-color: var(--accent-secondary);
+            box-shadow: 0 0 12px var(--accent-secondary);
+            animation: pulse-cyan 1.2s infinite alternate;
+        }
+
+        .status-badge.speaking .status-dot {
+            background-color: var(--accent-primary);
+            box-shadow: 0 0 12px var(--accent-primary);
+            animation: pulse-purple 1.2s infinite alternate;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+        @keyframes pulse-cyan {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+        @keyframes pulse-purple {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* Chat History Panel */
+        .chat-container {
+            flex: 1;
+            margin: 2rem 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .messages-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            padding-right: 0.5rem;
+            margin-bottom: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar customizing */
+        .messages-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .messages-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .messages-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Chat input bar styling */
+        .chat-input-bar {
+            display: flex;
+            gap: 0.75rem;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .chat-input-bar:focus-within {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .chat-input-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            padding: 0.5rem;
+        }
+        .chat-input-bar input::placeholder {
+            color: var(--text-secondary);
+        }
+        .chat-input-bar button {
+            background: var(--accent-primary);
+            border: none;
+            outline: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        .chat-input-bar button:hover {
+            background: #6d28d9;
+            transform: scale(1.04);
+        }
+        .chat-input-bar button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: var(--text-secondary);
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-secondary);
+            opacity: 0.4;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            max-width: 380px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 1rem 1.25rem;
+            border-radius: 20px;
+            font-size: 0.975rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-bubble.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, rgba(124, 58, 237, 0.6) 100%);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
+        }
+
+        .message-bubble.assistant {
+            align-self: flex-start;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-bubble.assistant.error {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+        }
+
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.4rem;
+            display: block;
+            text-align: right;
+        }
+
+        .message-bubble.user .message-timestamp {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Transcription Live Preview */
+        .live-transcript-container {
+            min-height: 48px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .live-transcript-container.active {
+            border-color: var(--accent-secondary);
+            color: var(--text-primary);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .pulse-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-secondary);
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .live-transcript-container.active .pulse-icon {
+            display: block;
+            animation: pulse-cyan 1s infinite alternate;
+        }
+
+        .live-transcript-text {
+            font-style: italic;
+        }
+
+        /* Bottom Controls / Mic Center */
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        /* Mic Button Wrapper */
+        .mic-outer-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 140px;
+            height: 140px;
+        }
+
+        /* Equalizer/Visualizer Canvas */
+        .visualizer-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            border-radius: 50%;
+        }
+
+        .mic-btn {
+            position: relative;
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            border: none;
+            outline: none;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #6366f1 100%);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            box-shadow: 
+                0 0 0 0px rgba(124, 58, 237, 0.4),
+                0 10px 25px rgba(124, 58, 237, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .mic-btn svg {
+            width: 32px;
+            height: 32px;
+            fill: #fff;
+            transition: all 0.3s ease;
+        }
+
+        /* Hover and State Animations */
+        .mic-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 
+                0 0 0 10px rgba(124, 58, 237, 0.1),
+                0 15px 30px rgba(124, 58, 237, 0.4);
+        }
+
+        /* Listening State */
+        .mic-btn.listening {
+            background: linear-gradient(135deg, var(--danger) 0%, #f43f5e 100%);
+            animation: breathe-red 2s infinite ease-in-out;
+            box-shadow: 
+                0 0 0 12px rgba(239, 68, 68, 0.2),
+                0 0 0 24px rgba(239, 68, 68, 0.1),
+                0 10px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .mic-btn.listening svg {
+            transform: scale(1.1);
+        }
+
+        /* Thinking state / loading ring */
+        .mic-btn.thinking {
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid var(--border-color);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: scale(0.95);
+        }
+
+        .mic-btn.thinking svg {
+            opacity: 0.2;
+        }
+
+        .thinking-ring {
+            position: absolute;
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent-secondary);
+            border-bottom-color: var(--accent-primary);
+            z-index: 1;
+            display: none;
+            animation: spin 1.2s linear infinite;
+        }
+
+        .mic-btn.thinking + .thinking-ring {
+            display: block;
+        }
+
+        /* Speaking State */
+        .mic-btn.speaking {
+            background: linear-gradient(135deg, var(--accent-secondary) 0%, #0891b2 100%);
+            box-shadow: 
+                0 0 0 12px rgba(6, 182, 212, 0.15),
+                0 10px 25px rgba(6, 182, 212, 0.3);
+        }
+
+        @keyframes breathe-red {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.2), 0 0 0 20px rgba(239, 68, 68, 0.1), 0 10px 25px rgba(239, 68, 68, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 16px rgba(239, 68, 68, 0.3), 0 0 0 32px rgba(239, 68, 68, 0.15), 0 15px 30px rgba(239, 68, 68, 0.5); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Tips & Controls settings panel */
+        .bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            gap: 1rem;
+        }
+
+        .voice-settings {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+        }
+
+        .voice-settings label {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .voice-settings select {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.8rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .voice-settings select option {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .clear-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: color 0.2s ease;
+        }
+
+        .clear-btn:hover {
+            color: var(--danger);
+        }
+
+        .clear-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+
+        /* Notifications/Toast alerts */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #ef4444;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            flex-shrink: 0;
+        }
+
+        /* Microphone Instructions Info text */
+        .hint-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            font-weight: 500;
+            min-height: 20px;
+        }
+
+        /* Wave visualizer animation during playback */
+        .visualizer-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mic-btn.speaking ~ .visualizer-overlay {
+            opacity: 1;
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.1; }
+            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.4; }
+            100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <!-- Soundwave / Aura SVG Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5v14M22 9v6M7 5v14M2 9v6"/>
+                </svg>
+                <span>SIRIVELA</span>
+            </div>
+            <div class="status-badge ready" id="statusBadge">
+                <span class="status-dot"></span>
+                <span id="statusText">Ready</span>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="messages-list" id="messagesList">
+                <div class="empty-state" id="emptyState">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h3>Start a Conversation</h3>
+                    <p>Click the microphone button below and ask a question. Sirivela will listen, process your request, and speak the reply.</p>
+                </div>
+            </div>
+
+            <!-- Chat Input Bar -->
+            <div class="chat-input-bar" id="chatInputBar">
+                <input type="text" id="chatInput" placeholder="Ask Sirivela something..." />
+                <button id="sendBtn" aria-label="Send Message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Live Transcript Preview -->
+            <div class="live-transcript-container" id="transcriptContainer">
+                <div class="pulse-icon"></div>
+                <div class="live-transcript-text" id="liveTranscript">Click the microphone to start talking...</div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <div class="hint-text" id="hintText">Tap the mic to speak</div>
+            
+            <div class="mic-outer-wrapper">
+                <canvas class="visualizer-canvas" id="visualizerCanvas" width="140" height="140"></canvas>
+                <button class="mic-btn" id="micBtn" aria-label="Toggle Microphone">
+                    <!-- Microphone SVG Icon -->
+                    <svg id="micIcon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                </button>
+                <div class="thinking-ring"></div>
+                <div class="visualizer-overlay"></div>
+            </div>
+
+            <!-- Bottom settings and clean options -->
+            <div class="bottom-bar">
+                <div class="voice-settings">
+                    <label for="voiceSelect">Voice:</label>
+                    <select id="voiceSelect">
+                        <option value="">Default System Voice</option>
+                    </select>
+                </div>
+
+                <button class="clear-btn" id="clearBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification System -->
+    <div class="toast" id="toast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="toastMsg">Microphone permission denied.</span>
+    </div>
+
+    <!-- Web Speech API and App Script -->
+    <script>
+        // DOM Elements
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+        const messagesList = document.getElementById('messagesList');
+        const emptyState = document.getElementById('emptyState');
+        const liveTranscript = document.getElementById('liveTranscript');
+        const transcriptContainer = document.getElementById('transcriptContainer');
+        const micBtn = document.getElementById('micBtn');
+        const hintText = document.getElementById('hintText');
+        const clearBtn = document.getElementById('clearBtn');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const visualizerCanvas = document.getElementById('visualizerCanvas');
+        const canvasCtx = visualizerCanvas.getContext('2d');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // App State
+        let isListening = false;
+        let isSpeaking = false;
+        let isProcessing = false;
+        let recognition = null;
+        let speechSynth = window.speechSynthesis;
+        let speechUtterance = null;
+        let voices = [];
+        let canvasAnimationId = null;
+        let audioCtx = null;
+        let currentVoice = null;
+        let finalTranscriptText = '';
+
+        // Audio Effects Synthesizer (Web Audio API)
+        function playChime(type) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'start') {
+                    // Soft wake chime (C5 then E5)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.12); // E5
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(0.15, now + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'success') {
+                    // Quick nice double click tone
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(783.99, now); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.08); // C6
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(0.1, now + 0.04);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'error') {
+                    // Low error beep
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(0.1, now + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {
+                console.error("Audio synthesiser issue: ", e);
+            }
+        }
+
+        // Show Toast Notification
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Setup Speech Synthesis Voices
+        function loadVoices() {
+            if (!speechSynth) return;
+            voices = speechSynth.getVoices();
+            voiceSelect.innerHTML = '<option value="">Default System Voice</option>';
+            
+            // Filter natural or interesting English/Local voices
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                if (voice.default) {
+                    option.selected = true;
+                }
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        if (speechSynth) {
+            loadVoices();
+            if (speechSynth.onvoiceschanged !== undefined) {
+                speechSynth.onvoiceschanged = loadVoices;
+            }
+        }
+
+        voiceSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val !== "") {
+                currentVoice = voices[parseInt(val)];
+            } else {
+                currentVoice = null;
+            }
+        });
+
+        // Initialize Speech Recognition
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("Web Speech Recognition is not supported by your browser. Please try Chrome or Edge.");
+                hintText.textContent = "Browser not supported";
+                micBtn.style.opacity = 0.4;
+                micBtn.style.pointerEvents = 'none';
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // Stop when the user stops talking
+            recognition.interimResults = true; // Show text live as spoken
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                finalTranscriptText = '';
+                updateUIState('listening');
+                playChime('start');
+                liveTranscript.textContent = "Listening...";
+                transcriptContainer.classList.add('active');
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscriptText += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                liveTranscript.textContent = finalTranscriptText || interimTranscript || "Listening...";
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech Recognition Error: ", event.error);
+                isListening = false;
+                transcriptContainer.classList.remove('active');
+                
+                if (event.error === 'not-allowed') {
+                    showToast("Microphone access denied. Please allow microphone permissions.");
+                    updateUIState('ready');
+                } else if (event.error === 'no-speech') {
+                    showToast("No speech was detected. Please try again.");
+                    updateUIState('ready');
+                } else {
+                    showToast(`Microphone error: ${event.error}`);
+                    updateUIState('ready');
+                }
+                playChime('error');
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                transcriptContainer.classList.remove('active');
+                
+                if (finalTranscriptText.trim() !== '') {
+                    sendToBackend(finalTranscriptText);
+                } else {
+                    updateUIState('ready');
+                    liveTranscript.textContent = "Click the microphone to start talking...";
+                }
+            };
+        }
+
+        // Draw Canvas Waves
+        function drawCanvasWaves() {
+            if (!canvasCtx) return;
+            canvasCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+            
+            const centerX = visualizerCanvas.width / 2;
+            const centerY = visualizerCanvas.height / 2;
+            const radius = 45;
+
+            // Generate nice fluctuating wave rings
+            let speedFactor = 0.05;
+            let amp = 0;
+
+            if (isListening) {
+                amp = 8;
+                speedFactor = 0.12;
+            } else if (isSpeaking) {
+                amp = 6;
+                speedFactor = 0.08;
+            } else {
+                amp = 1.5;
+                speedFactor = 0.03;
+            }
+
+            const time = Date.now() * speedFactor;
+
+            // Drawing 3 overlapping layers of glow waves
+            for (let layer = 0; layer < 3; layer++) {
+                canvasCtx.beginPath();
+                
+                const points = 60;
+                const layerOffset = layer * (Math.PI / 3) + time;
+                const layerAmp = amp * (1 - layer * 0.25);
+                
+                for (let i = 0; i <= points; i++) {
+                    const angle = (i / points) * Math.PI * 2;
+                    // Fluctuating offset to create organic movement
+                    const waveOffset = Math.sin(angle * 6 + layerOffset) * layerAmp;
+                    const r = radius + waveOffset;
+                    
+                    const x = centerX + Math.cos(angle) * r;
+                    const y = centerY + Math.sin(angle) * r;
+                    
+                    if (i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+                }
+
+                canvasCtx.closePath();
+                
+                // Colors depending on app state
+                if (isListening) {
+                    canvasCtx.strokeStyle = `rgba(239, 68, 68, ${0.7 - layer * 0.2})`; // Red
+                } else if (isSpeaking) {
+                    canvasCtx.strokeStyle = `rgba(6, 182, 212, ${0.7 - layer * 0.2})`; // Cyan
+                } else {
+                    canvasCtx.strokeStyle = `rgba(124, 58, 237, ${0.4 - layer * 0.1})`; // Violet
+                }
+                
+                canvasCtx.lineWidth = 1.5;
+                canvasCtx.stroke();
+            }
+
+            canvasAnimationId = requestAnimationFrame(drawCanvasWaves);
+        }
+
+        // Send Text to Python Flask Server
+        async function sendToBackend(text) {
+            updateUIState('thinking');
+            addMessageToFeed('user', text);
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    playChime('success');
+                    addMessageToFeed('assistant', data.response);
+                    speakText(data.response);
+                } else {
+                    throw new Error(data.error || "Unknown server error");
+                }
+            } catch (err) {
+                console.error("Backend Call Failed: ", err);
+                showToast(err.message || "Failed to contact local Flask API.");
+                playChime('error');
+                addMessageToFeed('assistant', `Error: ${err.message || "I had trouble connecting to the backend server. Make sure it is running."}`, true);
+                updateUIState('ready');
+            }
+        }
+
+        // Read Claude's text aloud using Speech Synthesis
+        function speakText(text) {
+            if (!speechSynth) {
+                updateUIState('ready');
+                return;
+            }
+
+            // Cancel any ongoing speaking
+            speechSynth.cancel();
+
+            // Filter out image tags from spoken text
+            const spokenText = text.replace(/\[IMAGE:.*?\]/gi, '').trim();
+
+            if (!spokenText) {
+                updateUIState('ready');
+                return;
+            }
+
+            speechUtterance = new SpeechSynthesisUtterance(spokenText);
+            
+            if (currentVoice) {
+                speechUtterance.voice = currentVoice;
+            }
+
+            speechUtterance.onstart = () => {
+                isSpeaking = true;
+                updateUIState('speaking');
+            };
+
+            speechUtterance.onend = () => {
+                isSpeaking = false;
+                updateUIState('ready');
+            };
+
+            speechUtterance.onerror = (e) => {
+                console.error("Speech Synthesis Error: ", e);
+                isSpeaking = false;
+                updateUIState('ready');
+            };
+
+            speechSynth.speak(speechUtterance);
+        }
+
+        // Add Message to Chat Feed
+        function addMessageToFeed(sender, text, isError = false, customTimestamp = null) {
+            // Hide empty state if it's visible
+            emptyState.style.display = 'none';
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('message-bubble', sender);
+            if (isError) {
+                bubble.classList.add('error');
+            }
+
+            // Parse text for image tags [IMAGE: keyword]
+            const imgRegex = /\[IMAGE:\s*(.*?)\]/i;
+            const match = text.match(imgRegex);
+            
+            let displayText = text;
+            let imgKeyword = null;
+            
+            if (match) {
+                displayText = text.replace(imgRegex, '').trim();
+                imgKeyword = match[1].trim();
+            }
+
+            // Sanitise simple text rendering
+            const textSpan = document.createElement('span');
+            textSpan.textContent = displayText;
+            bubble.appendChild(textSpan);
+
+            // Append image if keyword is found
+            if (imgKeyword) {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.marginTop = '10px';
+                
+                const img = document.createElement('img');
+                img.alt = imgKeyword;
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '12px';
+                img.style.display = 'block';
+                img.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
+                img.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                img.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                img.style.minHeight = '150px';
+                
+                // Fetch the real image URL from the /image backend search
+                fetch(`/image?q=${encodeURIComponent(imgKeyword)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        img.src = data.url;
+                    })
+                    .catch(err => {
+                        console.error("Failed to load image from backend:", err);
+                        img.src = `https://loremflickr.com/600/400/${encodeURIComponent(imgKeyword)}`;
+                    });
+                
+                imgContainer.appendChild(img);
+                bubble.appendChild(imgContainer);
+            }
+
+            // Add timestamp
+            const timestamp = document.createElement('span');
+            timestamp.classList.add('message-timestamp');
+            if (customTimestamp) {
+                // Formatting format HH:MM:SS to standard 2-digit representation
+                try {
+                    const parts = customTimestamp.split(':');
+                    const hour = parseInt(parts[0]);
+                    const min = parseInt(parts[1]);
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    const displayHour = hour % 12 || 12;
+                    const displayMin = min < 10 ? '0' + min : min;
+                    timestamp.textContent = `${displayHour}:${displayMin} ${ampm}`;
+                } catch (e) {
+                    timestamp.textContent = customTimestamp;
+                }
+            } else {
+                const now = new Date();
+                timestamp.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            bubble.appendChild(timestamp);
+
+            messagesList.appendChild(bubble);
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        // Toggle Mic Click Event
+        function handleMicClick() {
+            if (isProcessing) return; // Ignore while waiting for server response
+
+            // If we are currently speaking, click will stop the playback and start listening
+            if (isSpeaking) {
+                speechSynth.cancel();
+                isSpeaking = false;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                // Initialise if not already done
+                if (!recognition) {
+                    setupSpeechRecognition();
+                }
+                
+                if (recognition) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error("Recognition start error:", e);
+                    }
+                }
+            }
+        }
+
+        // Update UI styling according to App State
+        function updateUIState(state) {
+            statusBadge.className = 'status-badge';
+            micBtn.className = 'mic-btn';
+            
+            if (state === 'ready') {
+                statusBadge.classList.add('ready');
+                statusText.textContent = "Ready";
+                hintText.textContent = "Tap mic to speak";
+                isProcessing = false;
+                liveTranscript.textContent = "Click the microphone to start talking...";
+            } else if (state === 'listening') {
+                statusBadge.classList.add('listening');
+                statusText.textContent = "Listening";
+                hintText.textContent = "Speaking... Tap again to finish";
+                micBtn.classList.add('listening');
+            } else if (state === 'thinking') {
+                statusBadge.classList.add('thinking');
+                statusText.textContent = "Thinking";
+                hintText.textContent = "Processing response...";
+                micBtn.classList.add('thinking');
+                isProcessing = true;
+            } else if (state === 'speaking') {
+                statusBadge.classList.add('speaking');
+                statusText.textContent = "Speaking";
+                hintText.textContent = "Sirivela is speaking... Tap mic to interrupt";
+                micBtn.classList.add('speaking');
+            }
+        }
+
+        // Fetch stored history on page load
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                if (response.ok) {
+                    const history = await response.json();
+                    if (history.length > 0) {
+                        emptyState.style.display = 'none';
+                        history.forEach(item => {
+                            addMessageToFeed(item.sender, item.text, false, item.timestamp);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load history from backend:", err);
+            }
+        }
+
+        // Clear Chat History (UI & Backend)
+        clearBtn.addEventListener('click', async () => {
+            if (speechSynth) speechSynth.cancel();
+            messagesList.innerHTML = '';
+            emptyState.style.display = 'flex';
+            updateUIState('ready');
+            playChime('success');
+            
+            try {
+                await fetch('/history', { method: 'DELETE' });
+            } catch (err) {
+                console.error("Failed to delete history on backend:", err);
+            }
+            showToast("Conversation history cleared.");
+        });
+
+        // Chatbot Text Input Send Handlers
+        async function handleSendText() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            chatInput.value = '';
+            if (speechSynth) speechSynth.cancel();
+            
+            await sendToBackend(text);
+        }
+
+        sendBtn.addEventListener('click', handleSendText);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                handleSendText();
+            }
+        });
+
+        // Initialize App Event Listeners
+        micBtn.addEventListener('click', handleMicClick);
+        
+        // Start Wave drawing
+        drawCanvasWaves();
+        
+        // Set up Speech Recognition on load
+        setupSpeechRecognition();
+
+        // Load persistent history on startup
+        window.addEventListener('DOMContentLoaded', loadHistory);
+    </script>
+</body>
+</html>
