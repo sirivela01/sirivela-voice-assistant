@@ -59,6 +59,24 @@ def ask():
             return jsonify({'error': 'No message provided in request.'}), 400
 
         user_message = data['message']
+        local_time = data.get('local_time')
+        timezone = data.get('timezone')
+
+        system_instruction = (
+            "You are Sirivela, a friendly, helpful, and concise conversational voice assistant and chatbot. "
+            "Keep your answers brief (1-3 sentences) so they sound natural when read aloud. "
+            "Do not use markdown formatting (such as **, _, or bullet lists) in your response, "
+            "as they interfere with smooth speech synthesis. Speak naturally. "
+            "CRITICAL: For almost every informational response, you must automatically identify the main subject or entity being discussed (e.g. a specific car, animal, place, food, or object) and append '[IMAGE: subject]' at the very end of your response text (where 'subject' is the identified keyword, e.g. '[IMAGE: lion]' or '[IMAGE: electric car]'). This allows the interface to automatically display a relevant picture alongside the info."
+        )
+
+        if local_time:
+            system_instruction += (
+                f"\n\nUser's current local time context:\n"
+                f"- Local Time: {local_time}\n"
+                f"- Timezone: {timezone}\n"
+                f"Refer to this local time instead of UTC or any other reference if the user asks about the time, date, day of the week, or relative time references (like today, yesterday, tomorrow, etc.)."
+            )
 
         # Call Gemini API
         # Model: gemini-2.5-flash (optimized for speed and low latency, has free tier)
@@ -66,13 +84,8 @@ def ask():
             model='gemini-2.5-flash',
             contents=user_message,
             config=types.GenerateContentConfig(
-                system_instruction=(
-                    "You are Sirivela, a friendly, helpful, and concise conversational voice assistant and chatbot. "
-                    "Keep your answers brief (1-3 sentences) so they sound natural when read aloud. "
-                    "Do not use markdown formatting (such as **, _, or bullet lists) in your response, "
-                    "as they interfere with smooth speech synthesis. Speak naturally. "
-                    "CRITICAL: For almost every informational response, you must automatically identify the main subject or entity being discussed (e.g. a specific car, animal, place, food, or object) and append '[IMAGE: subject]' at the very end of your response text (where 'subject' is the identified keyword, e.g. '[IMAGE: lion]' or '[IMAGE: electric car]'). This allows the interface to automatically display a relevant picture alongside the info."
-                ),
+                system_instruction=system_instruction,
+                tools=[types.Tool(google_search=types.GoogleSearch())],
                 max_output_tokens=1000,
             )
         )

@@ -995,7 +995,11 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({ 
+                        message: text,
+                        local_time: new Date().toString(),
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    })
                 });
 
                 const data = await response.json();
