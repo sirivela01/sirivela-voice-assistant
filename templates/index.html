@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sirivela - Intelligent Voice Assistant</title>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,19 +51,22 @@
 
         /* Left Sidebar - Minimal & Clean */
         .sidebar {
-            width: 250px;
+            width: 220px;
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 1.5rem 1.25rem;
+            padding: 1.5rem 1.15rem;
             flex-shrink: 0;
             transition: all 0.3s ease;
             z-index: 10;
         }
 
         .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 1.5rem;
         }
 
@@ -82,29 +87,30 @@
             stroke-width: 2;
         }
 
-        .new-chat-btn {
+        .new-chat-icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            gap: 0.5rem;
-            width: 100%;
-            padding: 0.65rem 0.85rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: transparent;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
+            justify-content: center;
+            border-radius: 6px;
             transition: all 0.2s ease;
-            margin-bottom: 1.25rem;
+            padding: 0;
         }
 
-        .new-chat-btn:hover {
-            background: rgba(255, 255, 255, 0.02);
+        .new-chat-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
             color: var(--text-primary);
-            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .new-chat-icon-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
         }
 
         /* Recents */
@@ -145,17 +151,22 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.55rem 0.65rem;
+            padding: 0.45rem 0.65rem;
             border-radius: 6px;
-            font-size: 0.875rem;
+            font-size: 14px;
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
         }
 
-        .recent-item:hover, .recent-item.active {
-            background: rgba(255, 255, 255, 0.04);
+        .recent-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+        }
+
+        .recent-item.active {
+            background: rgba(255, 255, 255, 0.08);
             color: var(--text-primary);
         }
 
@@ -207,6 +218,7 @@
             display: flex;
             align-items: center;
             gap: 0.65rem;
+            width: 100%;
         }
 
         .user-profile .avatar {
@@ -220,6 +232,16 @@
             font-weight: 600;
             color: white;
             font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .user-profile-pic {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .user-profile .user-info {
@@ -240,6 +262,268 @@
         .user-profile .user-plan {
             font-size: 0.725rem;
             color: var(--text-secondary);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            margin-left: auto;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .logout-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+        }
+
+        /* Fullscreen Login Page Overlay */
+        .login-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .login-page.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .login-card {
+            background: #222222;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .login-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .login-logo svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-primary);
+            stroke-width: 2.5;
+        }
+
+        .login-logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+        }
+
+        .login-tagline {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-top: -0.5rem;
+        }
+
+        /* Continue with Google button */
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: #ffffff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .google-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            background: #fbfbfb;
+        }
+
+        .google-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .google-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .terms-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            max-width: 280px;
+        }
+
+        .terms-text a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mock login modal for developer mode */
+        .mock-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .mock-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mock-modal {
+            background: #232323;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .mock-modal-overlay.active .mock-modal {
+            transform: translateY(0);
+        }
+
+        .mock-modal-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .mock-modal-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .mock-user-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-align: left;
+        }
+
+        .mock-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-user) 0%, #a24b2d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .mock-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mock-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .mock-email {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .mock-btn {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 6px;
+            padding: 0.65rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .mock-btn:hover {
+            background: #ffffff;
+        }
+        
+        .mock-cancel-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
         }
 
         /* Main Workspace Panel */
@@ -991,7 +1275,7 @@
         @media (max-width: 768px) {
             .sidebar {
                 position: absolute;
-                left: -250px;
+                left: -220px;
                 height: 100%;
             }
             .sidebar.open {
@@ -1008,6 +1292,47 @@
 </head>
 <body>
 
+    <!-- Login Page -->
+    <div class="login-page" id="loginPage">
+        <div class="login-card">
+            <div class="login-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5v14M22 9v6M7 5v14M2 9v6"/>
+                </svg>
+                <h1>Sirivela</h1>
+                <p class="login-tagline">Your intelligent voice assistant</p>
+            </div>
+            <button class="google-btn" id="googleLoginBtn">
+                <!-- Google "G" SVG Logo -->
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
+            </button>
+            <p class="terms-text">By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+        </div>
+    </div>
+
+    <!-- Developer Mock Login Modal -->
+    <div class="mock-modal-overlay" id="mockModalOverlay">
+        <div class="mock-modal">
+            <div class="mock-modal-title">Developer Mock Login</div>
+            <div class="mock-modal-desc">No Google Client ID was found in your <code>.env</code> file. You can log in using this mock developer account.</div>
+            <div class="mock-user-card">
+                <div class="mock-avatar">Y</div>
+                <div class="mock-info">
+                    <span class="mock-name">S. Yashwanth Rao</span>
+                    <span class="mock-email">syash@example.com</span>
+                </div>
+            </div>
+            <button class="mock-btn" id="mockLoginConfirmBtn">Sign in as Developer</button>
+            <button class="mock-cancel-btn" id="mockLoginCancelBtn">Cancel</button>
+        </div>
+    </div>
+
     <div class="app-layout">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -1018,15 +1343,13 @@
                     </svg>
                     <span>Sirivela</span>
                 </div>
+                <button class="new-chat-icon-btn" id="newChatBtn" title="New chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </button>
             </div>
-
-            <button class="new-chat-btn" id="newChatBtn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                New chat
-            </button>
 
             <div class="recents-container">
                 <div class="recents-title">Recents</div>
@@ -1037,11 +1360,21 @@
 
             <div class="sidebar-footer">
                 <div class="user-profile">
-                    <div class="avatar">Y</div>
+                    <div id="userProfilePicContainer" style="display: flex;">
+                        <img class="user-profile-pic" id="userProfilePic" src="" alt="" style="display: none;" />
+                        <div class="avatar" id="userAvatarFallback">Y</div>
+                    </div>
                     <div class="user-info">
-                        <span class="user-name">S. Yashwanth Rao</span>
+                        <span class="user-name" id="userNameDisplay">S. Yashwanth Rao</span>
                         <span class="user-plan">Free Plan</span>
                     </div>
+                    <button class="logout-btn" id="logoutBtn" title="Sign out">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -1178,6 +1511,9 @@
     </div>
 
     <script>
+        // Inject Google Client ID from Python template rendering
+        const GOOGLE_CLIENT_ID = "{{ google_client_id }}";
+
         // DOM Elements
         const statusBadge = document.getElementById('statusBadge');
         const messagesList = document.getElementById('messagesList');
@@ -1198,7 +1534,15 @@
         const settingsBtn = document.getElementById('settingsBtn');
         const settingsPopover = document.getElementById('settingsPopover');
 
+        // Auth DOM Elements
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const mockModalOverlay = document.getElementById('mockModalOverlay');
+        const mockLoginConfirmBtn = document.getElementById('mockLoginConfirmBtn');
+        const mockLoginCancelBtn = document.getElementById('mockLoginCancelBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
         // State Variables
+        let currentUser = null;
         let currentSessionId = null;
         let isListening = false;
         let isSpeaking = false;
@@ -1211,6 +1555,141 @@
         let audioCtx = null;
         let currentVoice = null;
         let finalTranscriptText = '';
+
+        // Check Auth Status
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/auth/user');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authenticated) {
+                        currentUser = data.user;
+                        updateUserProfileUI(currentUser);
+                        document.getElementById('loginPage').classList.add('hidden');
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error("Auth check failed:", e);
+            }
+            document.getElementById('loginPage').classList.remove('hidden');
+            return false;
+        }
+
+        // Update User Profile display
+        function updateUserProfileUI(user) {
+            const nameDisplay = document.getElementById('userNameDisplay');
+            const pic = document.getElementById('userProfilePic');
+            const fallback = document.getElementById('userAvatarFallback');
+            
+            nameDisplay.textContent = user.name || "S. Yashwanth Rao";
+            if (user.picture) {
+                pic.src = user.picture;
+                pic.style.display = 'block';
+                fallback.style.display = 'none';
+            } else {
+                pic.style.display = 'none';
+                fallback.style.display = 'flex';
+                fallback.textContent = (user.name || "Y").charAt(0).toUpperCase();
+            }
+        }
+
+        // Google Identity Services Auth Trigger
+        function initGoogleLogin() {
+            if (!GOOGLE_CLIENT_ID) {
+                mockModalOverlay.classList.add('active');
+                return;
+            }
+
+            try {
+                const client = google.accounts.oauth2.initTokenClient({
+                    client_id: GOOGLE_CLIENT_ID,
+                    scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+                    callback: async (tokenResponse) => {
+                        if (tokenResponse && tokenResponse.access_token) {
+                            await handleGoogleLoginSuccess(tokenResponse.access_token);
+                        } else {
+                            showToast("Google login was cancelled or failed.");
+                        }
+                    },
+                });
+                client.requestAccessToken();
+            } catch (err) {
+                console.error("GIS client init error:", err);
+                showToast("Failed to initialize Google Login. Using mock login instead.");
+                mockModalOverlay.classList.add('active');
+            }
+        }
+
+        async function handleGoogleLoginSuccess(accessToken) {
+            try {
+                const response = await fetch('/auth/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: accessToken })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    updateUserProfileUI(currentUser);
+                    document.getElementById('loginPage').classList.add('hidden');
+                    playChime('success');
+                    await initAppFlow();
+                } else {
+                    const err = await response.json();
+                    showToast(err.error || "Authentication failed.");
+                }
+            } catch (err) {
+                console.error("Login verification failed:", err);
+                showToast("Server connection error during login.");
+            }
+        }
+
+        // Developer Mock Login Confirm
+        async function handleMockLogin() {
+            try {
+                const response = await fetch('/auth/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mock: true })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    updateUserProfileUI(currentUser);
+                    document.getElementById('loginPage').classList.add('hidden');
+                    mockModalOverlay.classList.remove('active');
+                    playChime('success');
+                    await initAppFlow();
+                } else {
+                    showToast("Mock authentication failed.");
+                }
+            } catch (err) {
+                console.error("Mock login request failed:", err);
+                showToast("Server connection error during mock login.");
+            }
+        }
+
+        // Logout Session Clear
+        async function handleLogout() {
+            if (speechSynth) speechSynth.cancel();
+            
+            try {
+                const response = await fetch('/auth/logout', { method: 'POST' });
+                if (response.ok) {
+                    currentUser = null;
+                    document.getElementById('loginPage').classList.remove('hidden');
+                    playChime('success');
+                    messagesList.innerHTML = '';
+                    currentSessionId = null;
+                }
+            } catch (err) {
+                console.error("Logout request failed:", err);
+                showToast("Server error during logout.");
+            }
+        }
 
         // Audio Effects Synthesizer (Web Audio API)
         function playChime(type) {
@@ -1934,14 +2413,20 @@
         micBtn.addEventListener('click', handleMicClick);
         newChatBtn.addEventListener('click', createNewSession);
         
+        // Auth Event Listeners
+        googleLoginBtn.addEventListener('click', initGoogleLogin);
+        mockLoginConfirmBtn.addEventListener('click', handleMockLogin);
+        mockLoginCancelBtn.addEventListener('click', () => mockModalOverlay.classList.remove('active'));
+        logoutBtn.addEventListener('click', handleLogout);
+        
         // Start Wave drawing
         drawCanvasWaves();
         
         // Set up Speech Recognition on load
         setupSpeechRecognition();
 
-        // Startup Flow
-        window.addEventListener('DOMContentLoaded', async () => {
+        // App Initial Flow helper
+        async function initAppFlow() {
             try {
                 const response = await fetch('/sessions');
                 if (response.ok) {
@@ -1957,6 +2442,14 @@
                 }
             } catch (e) {
                 await createNewSession();
+            }
+        }
+
+        // Startup Flow
+        window.addEventListener('DOMContentLoaded', async () => {
+            const authenticated = await checkAuthStatus();
+            if (authenticated) {
+                await initAppFlow();
             }
         });
     </script>

@@ -3,7 +3,7 @@ import json
 import requests
 import uuid
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session
 from flask_cors import CORS
 from google import genai
 from google.genai import types
@@ -17,6 +17,9 @@ app = Flask(__name__)
 # Enable CORS for cross-origin requests
 CORS(app)
 
+# Set secret key for Flask session signing
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "sirivela-secret-key-123-change-me")
+
 # Initialize the Gemini Client
 api_key = os.environ.get("GEMINI_API_KEY")
 client = None
@@ -29,7 +32,62 @@ else:
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    if google_client_id.startswith("your_") or not google_client_id:
+        google_client_id = ""
+    return render_template('index.html', google_client_id=google_client_id)
+
+@app.route('/auth/user', methods=['GET'])
+def get_auth_user():
+    user = session.get('user')
+    if not user:
+        return jsonify({"authenticated": False}), 401
+    return jsonify({"authenticated": True, "user": user})
+
+@app.route('/auth/session', methods=['POST'])
+def establish_session():
+    data = request.get_json() or {}
+    is_mock = data.get('mock', False)
+    google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    
+    # Check if we should fall back to mock
+    if is_mock or google_client_id.startswith("your_") or not google_client_id:
+        mock_user = {
+            "name": data.get("name", "S. Yashwanth Rao"),
+            "email": data.get("email", "syash@example.com"),
+            "picture": data.get("picture", "")
+        }
+        session['user'] = mock_user
+        return jsonify({"status": "success", "user": mock_user})
+        
+    access_token = data.get('access_token')
+    if not access_token:
+        return jsonify({"error": "No access token provided"}), 400
+        
+    try:
+        # Verify access token with Google UserInfo endpoint
+        userinfo_url = "https://www.googleapis.com/oauth2/v3/userinfo"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        resp = requests.get(userinfo_url, headers=headers, timeout=5)
+        
+        if resp.status_code != 200:
+            return jsonify({"error": "Failed to verify token with Google"}), 401
+            
+        profile = resp.json()
+        user_info = {
+            "name": profile.get("name", "Google User"),
+            "email": profile.get("email", ""),
+            "picture": profile.get("picture", "")
+        }
+        session['user'] = user_info
+        return jsonify({"status": "success", "user": user_info})
+    except Exception as e:
+        return jsonify({"error": f"Authentication failed: {str(e)}"}), 500
+
+@app.route('/auth/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return jsonify({"status": "success"})
 
 def load_history_data():
     history_file = os.path.join(basedir, 'history.json')
