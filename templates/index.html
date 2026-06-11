@@ -1672,7 +1672,7 @@
         function handleMicClick() {
             if (isProcessing) return;
 
-            if (isSpeaking) {
+            if (isSpeaking || (speechSynth && speechSynth.speaking)) {
                 speechSynth.cancel();
                 isSpeaking = false;
                 updateUIState('ready');
