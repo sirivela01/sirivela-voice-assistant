@@ -1501,6 +1501,8 @@
             if (isSpeaking) {
                 speechSynth.cancel();
                 isSpeaking = false;
+                updateUIState('ready');
+                return;
             }
 
             if (isListening) {
