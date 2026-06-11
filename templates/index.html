@@ -506,21 +506,138 @@
             text-align: right;
         }
 
-        /* Image styling inside plain-text responses */
-        .assistant-image-container {
-            margin-top: 0.5rem;
+        /* Web Images Grid Layout */
+        .web-images-container {
+            margin-top: 0.75rem;
             max-width: 560px;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
         }
 
-        .assistant-image-container img {
-            max-width: 100%;
+        .web-images-grid {
+            display: grid;
+            gap: 6px;
+            width: 100%;
             border-radius: 12px;
-            display: block;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        /* 3 Image Grid: Left tall, right two stacked */
+        .web-images-grid.grid-3 {
+            grid-template-columns: 1.2fr 1fr;
+            height: 280px;
+        }
+
+        .grid-left-col {
+            height: 100%;
+            position: relative;
+        }
+
+        .grid-right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            height: 100%;
+        }
+
+        /* 2 Image Grid: Side-by-side */
+        .web-images-grid.grid-2 {
+            grid-template-columns: 1fr 1fr;
+            height: 180px;
+        }
+
+        /* 1 Image Grid: Single */
+        .web-images-grid.grid-1 {
+            grid-template-columns: 1fr;
+            height: auto;
+            max-height: 300px;
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
             background-color: rgba(255, 255, 255, 0.02);
-            min-height: 150px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .web-images-grid.grid-1 .image-wrapper {
+            height: auto;
+            border-radius: 12px;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .web-images-grid.grid-1 img {
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+        }
+
+        .image-wrapper:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Source Pill at bottom-left of each image */
+        .source-pill {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(15, 15, 15, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+            padding: 3px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            max-width: calc(100% - 16px);
+        }
+
+        .source-pill:hover {
+            background: rgba(15, 15, 15, 0.85);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .source-pill span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pill-icon {
+            width: 10px;
+            height: 10px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            fill: none;
+            flex-shrink: 0;
+        }
+
+        /* Caption under entire grid */
+        .grid-caption {
+            font-size: 11px;
+            color: var(--text-secondary);
+            align-self: flex-end;
+            margin-top: 2px;
+            font-weight: 500;
         }
 
         /* Floating Pill Input Bar */
@@ -1405,6 +1522,32 @@
             }
         }
 
+        // Create single image wrapper with source metadata pill
+        function createImageWrapper(imgData) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('image-wrapper');
+            
+            const img = document.createElement('img');
+            img.src = imgData.url;
+            img.alt = 'Web image';
+            wrapper.appendChild(img);
+            
+            const pill = document.createElement('a');
+            pill.href = imgData.link || '#';
+            pill.target = '_blank';
+            pill.classList.add('source-pill');
+            pill.innerHTML = `
+                <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span>${imgData.source || 'web'}</span>
+            `;
+            wrapper.appendChild(pill);
+            return wrapper;
+        }
+
         // Add Message Row
         function addMessageToFeed(sender, text, isError = false, customTimestamp = null) {
             emptyState.style.display = 'none';
@@ -1445,26 +1588,57 @@
                 textSpan.textContent = displayText;
                 contentWrapper.appendChild(textSpan);
 
-                // Image inside response
+                // Image inside response - renders a grid of up to 3 images matching Dhoni screenshot
                 if (imgKeyword) {
-                    const imgContainer = document.createElement('div');
-                    imgContainer.classList.add('assistant-image-container');
-                    
-                    const img = document.createElement('img');
-                    img.alt = imgKeyword;
+                    const webImagesContainer = document.createElement('div');
+                    webImagesContainer.classList.add('web-images-container');
                     
                     fetch(`/image?q=${encodeURIComponent(imgKeyword)}`)
                         .then(res => res.json())
                         .then(data => {
-                            img.src = data.url;
+                            const images = data.images || [];
+                            if (images.length === 0) return;
+                            
+                            const grid = document.createElement('div');
+                            grid.classList.add('web-images-grid');
+                            grid.classList.add(`grid-${Math.min(3, images.length)}`);
+                            
+                            if (images.length === 3) {
+                                // 3 Image Grid: Left vertical tall, Right two stacked horizontal
+                                const leftCol = document.createElement('div');
+                                leftCol.classList.add('grid-left-col');
+                                leftCol.appendChild(createImageWrapper(images[0]));
+                                
+                                const rightCol = document.createElement('div');
+                                rightCol.classList.add('grid-right-col');
+                                rightCol.appendChild(createImageWrapper(images[1]));
+                                rightCol.appendChild(createImageWrapper(images[2]));
+                                
+                                grid.appendChild(leftCol);
+                                grid.appendChild(rightCol);
+                            } else if (images.length === 2) {
+                                // 2 Image Grid: Side by side
+                                grid.appendChild(createImageWrapper(images[0]));
+                                grid.appendChild(createImageWrapper(images[1]));
+                            } else {
+                                // 1 Image Grid: Single
+                                grid.appendChild(createImageWrapper(images[0]));
+                            }
+                            
+                            webImagesContainer.appendChild(grid);
+                            
+                            const caption = document.createElement('div');
+                            caption.classList.add('grid-caption');
+                            caption.textContent = 'Results from the web';
+                            webImagesContainer.appendChild(caption);
+                            
+                            messagesList.scrollTop = messagesList.scrollHeight;
                         })
                         .catch(err => {
-                            console.error("Failed to load image from backend:", err);
-                            img.src = `https://loremflickr.com/600/400/${encodeURIComponent(imgKeyword)}`;
+                            console.error("Failed to load images from backend:", err);
                         });
                     
-                    imgContainer.appendChild(img);
-                    contentWrapper.appendChild(imgContainer);
+                    contentWrapper.appendChild(webImagesContainer);
                 }
 
                 const timestamp = document.createElement('span');

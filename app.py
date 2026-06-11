@@ -235,31 +235,49 @@ def get_image():
 
     headers = {'User-Agent': 'SirivelaVoiceAssistant/1.0 (contact@example.com)'}
     fallback_url = f"https://loremflickr.com/600/400/{query}"
+    fallback_images = [
+        {
+            'url': fallback_url,
+            'source': 'loremflickr.com',
+            'link': 'https://loremflickr.com'
+        }
+    ]
 
     try:
-        # Step 1: Search Wikipedia for the best matching page title
-        search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json"
+        # Query Wikimedia Commons for up to 3 image results
+        search_url = f"https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch={query}&gsrnamespace=6&prop=imageinfo&iiprop=url&format=json&gsrlimit=3"
         r = requests.get(search_url, headers=headers, timeout=5)
-        search_data = r.json()
-        search_results = search_data.get('query', {}).get('search', [])
+        data = r.json()
+        pages = data.get('query', {}).get('pages', {})
         
-        if search_results:
-            best_title = search_results[0]['title']
+        images = []
+        if pages:
+            # Sort pages by match index
+            sorted_pages = sorted(pages.values(), key=lambda x: x.get('index', 0))
+            for page in sorted_pages:
+                info = page.get('imageinfo', [])
+                if info:
+                    url = info[0].get('url')
+                    desc_url = info[0].get('descriptionurl', '')
+                    if url:
+                        images.append({
+                            'url': url,
+                            'source': 'commons.wikimedia.org',
+                            'link': desc_url
+                        })
             
-            # Step 2: Fetch the page image for the best title
-            img_url = f"https://en.wikipedia.org/w/api.php?action=query&titles={best_title}&prop=pageimages&format=json&pithumbsize=600"
-            r2 = requests.get(img_url, headers=headers, timeout=5)
-            img_data = r2.json()
-            pages = img_data.get('query', {}).get('pages', {})
-            
-            for page_id, page_info in pages.items():
-                thumbnail = page_info.get('thumbnail', {}).get('source')
-                if thumbnail:
-                    return jsonify({'url': thumbnail})
+            if images:
+                return jsonify({
+                    'url': images[0]['url'],
+                    'images': images
+                })
     except Exception as e:
-        print(f"Error fetching wiki image for {query}: {e}")
+        print(f"Error fetching Wikimedia Commons images for {query}: {e}")
         
-    return jsonify({'url': fallback_url})
+    return jsonify({
+        'url': fallback_url,
+        'images': fallback_images
+    })
 
 if __name__ == '__main__':
     # Run the server
