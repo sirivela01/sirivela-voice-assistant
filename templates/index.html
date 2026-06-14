@@ -1685,6 +1685,21 @@
         const welcomeGuestBtn = document.getElementById('welcomeGuestBtn');
         const authBackBtn = document.getElementById('authBackBtn');
 
+        // Global State Variables
+        const speechSynth = window.speechSynthesis || null;
+        let recognition = null;
+        let isListening = false;
+        let isSpeaking = false;
+        let isProcessing = false;
+        let voices = [];
+        let currentVoice = null;
+        let currentUser = null;
+        let currentSessionId = null;
+        let finalTranscriptText = '';
+        let audioCtx = null;
+        let canvasAnimationId = null;
+        let speechUtterance = null;
+
         function showSignIn() {
             document.getElementById('welcomeScreen').classList.add('hidden');
             document.getElementById('signInScreen').classList.remove('hidden');
