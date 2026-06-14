@@ -2,8 +2,10 @@ import os
 import json
 import requests
 import uuid
+import urllib.parse
+import hashlib
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template, session
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from flask_cors import CORS
 from google import genai
 from google.genai import types
@@ -30,6 +32,28 @@ if api_key and api_key != "your_actual_gemini_api_key_here":
 else:
     print(f"WARNING: GEMINI_API_KEY is not configured or is set to placeholder. Value: {api_key!r}")
 
+# Users database helpers (JSON-based)
+def load_users_data():
+    users_file = os.path.join(basedir, 'users.json')
+    if os.path.exists(users_file):
+        try:
+            with open(users_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading users: {e}")
+    return {"users": {}}
+
+def save_users_data(data):
+    users_file = os.path.join(basedir, 'users.json')
+    try:
+        with open(users_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        print(f"Error saving users: {e}")
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
 @app.route('/')
 def index():
     google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
@@ -44,45 +68,119 @@ def get_auth_user():
         return jsonify({"authenticated": False}), 401
     return jsonify({"authenticated": True, "user": user})
 
-@app.route('/auth/session', methods=['POST'])
-def establish_session():
-    data = request.get_json() or {}
-    is_mock = data.get('mock', False)
+@app.route('/auth/login', methods=['GET'])
+def auth_login():
     google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    if google_client_id.startswith("your_") or not google_client_id:
+        return "Google Client ID not configured", 400
+        
+    redirect_uri = request.host_url.rstrip('/') + '/auth/callback'
+    # Force HTTPS when running on production (Render.com)
+    if 'localhost' not in request.host and '127.0.0.1' not in request.host and '192.168.' not in request.host:
+        if redirect_uri.startswith("http://"):
+            redirect_uri = redirect_uri.replace("http://", "https://", 1)
+            
+    params = {
+        "client_id": google_client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "select_account"
+    }
+    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)
+    return redirect(auth_url)
+
+@app.route('/auth/callback', methods=['GET'])
+def auth_callback():
+    code = request.args.get('code')
+    if not code:
+        return "Authorization code missing", 400
+        
+    google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    google_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
     
-    # Check if we should fall back to mock
-    if is_mock or google_client_id.startswith("your_") or not google_client_id:
-        mock_user = {
-            "name": data.get("name", "S. Yashwanth Rao"),
-            "email": data.get("email", "syash@example.com"),
-            "picture": data.get("picture", "")
-        }
-        session['user'] = mock_user
-        return jsonify({"status": "success", "user": mock_user})
-        
-    access_token = data.get('access_token')
-    if not access_token:
-        return jsonify({"error": "No access token provided"}), 400
-        
+    redirect_uri = request.host_url.rstrip('/') + '/auth/callback'
+    # Force HTTPS when running on production (Render.com)
+    if 'localhost' not in request.host and '127.0.0.1' not in request.host and '192.168.' not in request.host:
+        if redirect_uri.startswith("http://"):
+            redirect_uri = redirect_uri.replace("http://", "https://", 1)
+            
+    token_url = "https://oauth2.googleapis.com/token"
+    payload = {
+        "code": code,
+        "client_id": google_client_id,
+        "client_secret": google_client_secret,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code"
+    }
+    
     try:
-        # Verify access token with Google UserInfo endpoint
+        resp = requests.post(token_url, data=payload, timeout=5)
+        if resp.status_code != 200:
+            return f"Failed to retrieve tokens from Google: {resp.text}", 400
+            
+        tokens = resp.json()
+        access_token = tokens.get('access_token')
+        
         userinfo_url = "https://www.googleapis.com/oauth2/v3/userinfo"
         headers = {"Authorization": f"Bearer {access_token}"}
-        resp = requests.get(userinfo_url, headers=headers, timeout=5)
+        profile_resp = requests.get(userinfo_url, headers=headers, timeout=5)
         
-        if resp.status_code != 200:
-            return jsonify({"error": "Failed to verify token with Google"}), 401
+        if profile_resp.status_code != 200:
+            return "Failed to fetch user profile from Google", 400
             
-        profile = resp.json()
-        user_info = {
+        profile = profile_resp.json()
+        session['user'] = {
             "name": profile.get("name", "Google User"),
             "email": profile.get("email", ""),
             "picture": profile.get("picture", "")
         }
+        return redirect('/')
+    except Exception as e:
+        return f"Authentication error: {str(e)}", 500
+
+@app.route('/auth/login_email', methods=['POST'])
+def auth_login_email():
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+        
+    db = load_users_data()
+    user = db["users"].get(email)
+    
+    if not user:
+        # Auto-registration if account does not exist
+        name = email.split('@')[0].replace('.', ' ').replace('-', ' ').title()
+        db["users"][email] = {
+            "name": name,
+            "password": hash_password(password),
+            "picture": ""
+        }
+        save_users_data(db)
+        
+        user_info = {
+            "name": name,
+            "email": email,
+            "picture": ""
+        }
+        session['user'] = user_info
+        return jsonify({"status": "success", "user": user_info, "message": "Registered and logged in"})
+    else:
+        # Check password for existing account
+        if user.get("password") != hash_password(password):
+            return jsonify({"error": "Invalid password for this account"}), 401
+            
+        user_info = {
+            "name": user.get("name"),
+            "email": email,
+            "picture": user.get("picture", "")
+        }
         session['user'] = user_info
         return jsonify({"status": "success", "user": user_info})
-    except Exception as e:
-        return jsonify({"error": f"Authentication failed: {str(e)}"}), 500
 
 @app.route('/auth/logout', methods=['POST'])
 def logout():

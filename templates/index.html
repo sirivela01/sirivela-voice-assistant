@@ -406,125 +406,89 @@
             text-decoration: underline;
         }
 
-        /* Mock login modal for developer mode */
-        .mock-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+        /* Divider or */
+        .login-divider {
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 1100;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .mock-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
+            width: 100%;
+            margin: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
         }
 
-        .mock-modal {
-            background: #232323;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            width: 90%;
-            max-width: 380px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            text-align: center;
+        .login-divider::before,
+        .login-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .login-divider span {
+            padding: 0 0.75rem;
+        }
+
+        /* Email/Password Form */
+        .auth-form {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
-
-        .mock-modal-overlay.active .mock-modal {
-            transform: translateY(0);
-        }
-
-        .mock-modal-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .mock-modal-desc {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .mock-user-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            width: 100%;
+            gap: 1rem;
             text-align: left;
         }
 
-        .mock-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-user) 0%, #a24b2d 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            font-size: 1.1rem;
-        }
-
-        .mock-info {
+        .form-group {
             display: flex;
             flex-direction: column;
+            gap: 0.35rem;
         }
 
-        .mock-name {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .mock-email {
-            font-size: 0.75rem;
+        .form-group label {
+            font-size: 0.8rem;
             color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        .mock-btn {
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 6px;
-            padding: 0.65rem;
+        .form-group input {
+            background: #2a2a2a;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
             font-size: 0.9rem;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: #2f2f2f;
+        }
+
+        .submit-btn {
+            background: var(--accent-user);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            width: 100%;
+            transition: background 0.2s ease, transform 0.1s ease;
+            margin-top: 0.5rem;
         }
 
-        .mock-btn:hover {
-            background: #ffffff;
+        .submit-btn:hover {
+            background: #a24b2d;
         }
-        
-        .mock-cancel-btn {
-            background: transparent;
-            color: var(--text-secondary);
-            border: none;
-            cursor: pointer;
-            font-size: 0.8rem;
-            text-decoration: underline;
+
+        .submit-btn:active {
+            transform: scale(0.98);
         }
+
+
 
         /* Main Workspace Panel */
         .main-panel {
@@ -1302,6 +1266,7 @@
                 <h1>Sirivela</h1>
                 <p class="login-tagline">Your intelligent voice assistant</p>
             </div>
+            
             <button class="google-btn" id="googleLoginBtn">
                 <!-- Google "G" SVG Logo -->
                 <svg class="google-icon" viewBox="0 0 24 24">
@@ -1312,24 +1277,25 @@
                 </svg>
                 Continue with Google
             </button>
-            <p class="terms-text">By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
-        </div>
-    </div>
 
-    <!-- Developer Mock Login Modal -->
-    <div class="mock-modal-overlay" id="mockModalOverlay">
-        <div class="mock-modal">
-            <div class="mock-modal-title">Developer Mock Login</div>
-            <div class="mock-modal-desc">No Google Client ID was found in your <code>.env</code> file. You can log in using this mock developer account.</div>
-            <div class="mock-user-card">
-                <div class="mock-avatar">Y</div>
-                <div class="mock-info">
-                    <span class="mock-name">S. Yashwanth Rao</span>
-                    <span class="mock-email">syash@example.com</span>
-                </div>
+            <div class="login-divider">
+                <span>or</span>
             </div>
-            <button class="mock-btn" id="mockLoginConfirmBtn">Sign in as Developer</button>
-            <button class="mock-cancel-btn" id="mockLoginCancelBtn">Cancel</button>
+
+            <!-- Email/Password Form -->
+            <form class="auth-form" id="authForm" onsubmit="handleAuthFormSubmit(event)">
+                <div class="form-group">
+                    <label for="authEmail">Email address</label>
+                    <input type="email" id="authEmail" placeholder="Enter your email" required />
+                </div>
+                <div class="form-group">
+                    <label for="authPassword">Password</label>
+                    <input type="password" id="authPassword" placeholder="Enter your password" required />
+                </div>
+                <button type="submit" class="submit-btn" id="authSubmitBtn">Continue</button>
+            </form>
+
+            <p class="terms-text">By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
         </div>
     </div>
 
@@ -1536,9 +1502,6 @@
 
         // Auth DOM Elements
         const googleLoginBtn = document.getElementById('googleLoginBtn');
-        const mockModalOverlay = document.getElementById('mockModalOverlay');
-        const mockLoginConfirmBtn = document.getElementById('mockLoginConfirmBtn');
-        const mockLoginCancelBtn = document.getElementById('mockLoginCancelBtn');
         const logoutBtn = document.getElementById('logoutBtn');
 
         // State Variables
@@ -1594,82 +1557,49 @@
             }
         }
 
-        // Google Identity Services Auth Trigger
+        async function handleAuthFormSubmit(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            
+            try {
+                const response = await fetch('/auth/login_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    currentUser = data.user;
+                    updateUserProfileUI(currentUser);
+                    document.getElementById('loginPage').classList.add('hidden');
+                    playChime('success');
+                    
+                    // Reset form fields
+                    document.getElementById('authEmail').value = '';
+                    document.getElementById('authPassword').value = '';
+                    
+                    await initAppFlow();
+                } else {
+                    showToast(data.error || "Authentication failed.");
+                    playChime('error');
+                }
+            } catch (err) {
+                console.error("Auth form submission failed:", err);
+                showToast("Server connection error.");
+                playChime('error');
+            }
+        }
+
+        // Google Redirect-Based Auth Trigger
         function initGoogleLogin() {
             if (!GOOGLE_CLIENT_ID) {
-                mockModalOverlay.classList.add('active');
+                showToast("Google Login is not configured. Please use Email/Password below.");
                 return;
             }
-
-            try {
-                const client = google.accounts.oauth2.initTokenClient({
-                    client_id: GOOGLE_CLIENT_ID,
-                    scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-                    callback: async (tokenResponse) => {
-                        if (tokenResponse && tokenResponse.access_token) {
-                            await handleGoogleLoginSuccess(tokenResponse.access_token);
-                        } else {
-                            showToast("Google login was cancelled or failed.");
-                        }
-                    },
-                });
-                client.requestAccessToken();
-            } catch (err) {
-                console.error("GIS client init error:", err);
-                showToast("Failed to initialize Google Login. Using mock login instead.");
-                mockModalOverlay.classList.add('active');
-            }
-        }
-
-        async function handleGoogleLoginSuccess(accessToken) {
-            try {
-                const response = await fetch('/auth/session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ access_token: accessToken })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    currentUser = data.user;
-                    updateUserProfileUI(currentUser);
-                    document.getElementById('loginPage').classList.add('hidden');
-                    playChime('success');
-                    await initAppFlow();
-                } else {
-                    const err = await response.json();
-                    showToast(err.error || "Authentication failed.");
-                }
-            } catch (err) {
-                console.error("Login verification failed:", err);
-                showToast("Server connection error during login.");
-            }
-        }
-
-        // Developer Mock Login Confirm
-        async function handleMockLogin() {
-            try {
-                const response = await fetch('/auth/session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mock: true })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    currentUser = data.user;
-                    updateUserProfileUI(currentUser);
-                    document.getElementById('loginPage').classList.add('hidden');
-                    mockModalOverlay.classList.remove('active');
-                    playChime('success');
-                    await initAppFlow();
-                } else {
-                    showToast("Mock authentication failed.");
-                }
-            } catch (err) {
-                console.error("Mock login request failed:", err);
-                showToast("Server connection error during mock login.");
-            }
+            window.location.href = '/auth/login';
         }
 
         // Logout Session Clear
@@ -2415,8 +2345,6 @@
         
         // Auth Event Listeners
         googleLoginBtn.addEventListener('click', initGoogleLogin);
-        mockLoginConfirmBtn.addEventListener('click', handleMockLogin);
-        mockLoginCancelBtn.addEventListener('click', () => mockModalOverlay.classList.remove('active'));
         logoutBtn.addEventListener('click', handleLogout);
         
         // Start Wave drawing
