@@ -182,6 +182,16 @@ def auth_login_email():
         session['user'] = user_info
         return jsonify({"status": "success", "user": user_info})
 
+@app.route('/auth/login_guest', methods=['POST'])
+def login_guest():
+    guest_user = {
+        "name": "Guest User",
+        "email": "guest@sirivela.local",
+        "picture": ""
+    }
+    session['user'] = guest_user
+    return jsonify({"status": "success", "user": guest_user})
+
 @app.route('/auth/logout', methods=['POST'])
 def logout():
     session.pop('user', None)

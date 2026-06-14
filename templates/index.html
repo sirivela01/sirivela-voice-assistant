@@ -292,18 +292,19 @@
         }
 
         /* Fullscreen Login Page Overlay */
-        .login-page {
+                .login-page {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #1a1a1a;
+            background-color: #121212; /* Sleeker, darker bg */
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
             transition: opacity 0.3s ease, visibility 0.3s ease;
+            font-family: 'Roboto', 'Outfit', 'Inter', sans-serif;
         }
 
         .login-page.hidden {
@@ -312,50 +313,178 @@
             pointer-events: none;
         }
 
-        .login-card {
-            background: #222222;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 3rem 2.5rem;
-            width: 100%;
-            max-width: 400px;
+        /* Chrome Setup Welcome Screen */
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2rem;
+            max-width: 480px;
+            width: 90%;
+            padding: 2rem;
+            animation: fadeIn 0.4s ease;
         }
 
-        .login-logo {
+        .chrome-avatar-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #fde047; /* Yellow circle */
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            color: #713f12; /* Dark gold color for icon */
+            box-shadow: 0 4px 15px rgba(253, 224, 71, 0.2);
         }
 
-        .login-logo svg {
+        .chrome-avatar-circle svg {
+            width: 54px;
+            height: 54px;
+        }
+
+        .welcome-title {
+            font-size: 2.2rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+
+        .welcome-desc {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.5;
+            max-width: 380px;
+        }
+
+        .welcome-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        /* Standard Google-style Pill Buttons */
+        .chrome-btn-primary {
+            background: #0b57d0; /* Google blue */
+            color: #ffffff;
+            border: none;
+            border-radius: 100px; /* Pill */
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+            text-align: center;
+            font-family: inherit;
+        }
+
+        .chrome-btn-primary:hover {
+            background: #0b4fc0;
+        }
+
+        .chrome-btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .chrome-btn-secondary {
+            background: #d3e3fd; /* Google light blue */
+            color: #041e49; /* Google dark blue text */
+            border: none;
+            border-radius: 100px; /* Pill */
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+            text-align: center;
+            font-family: inherit;
+        }
+
+        .chrome-btn-secondary:hover {
+            background: #c2d7fa;
+        }
+
+        .chrome-btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        /* Google Web Sign In split screen style */
+        .google-signin-container {
+            display: flex;
+            background: #1e1e1e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            width: 90%;
+            max-width: 740px;
+            min-height: 400px;
+            padding: 2.5rem;
+            gap: 2.5rem;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .google-signin-container.hidden {
+            display: none;
+        }
+
+        .google-signin-left {
+            flex: 1.1;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .google-logo-svg {
             width: 48px;
             height: 48px;
-            stroke: var(--text-primary);
-            stroke-width: 2.5;
+            margin-bottom: 1.5rem;
         }
 
-        .login-logo h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
+        .google-signin-title {
+            font-size: 2rem;
+            font-weight: 400;
             color: var(--text-primary);
-            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
         }
 
-        .login-tagline {
-            font-size: 0.95rem;
+        .google-signin-subtitle {
+            font-size: 1.05rem;
             color: var(--text-secondary);
-            margin-top: -0.5rem;
+            margin-bottom: auto;
         }
 
-        /* Continue with Google button */
-        .google-btn {
+        .google-signin-notes {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-top: 2rem;
+        }
+
+        .google-signin-right {
+            flex: 0.9;
+            display: flex;
+            align-items: center;
+        }
+
+        .google-card {
+            background: #252525;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .google-btn-brand {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -364,128 +493,136 @@
             color: #1a1a1a;
             border: none;
             border-radius: 8px;
-            padding: 0.75rem 1.5rem;
-            font-size: 0.95rem;
+            padding: 0.7rem 1.25rem;
+            font-size: 0.9rem;
             font-weight: 500;
             font-family: inherit;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background 0.15s, transform 0.1s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        .google-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            background: #fbfbfb;
+        .google-btn-brand:hover {
+            background: #f8f8f8;
         }
 
-        .google-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        .google-btn-brand .google-icon {
+            width: 16px;
+            height: 16px;
         }
 
-        .google-icon {
-            width: 18px;
-            height: 18px;
-        }
-
-        .terms-text {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
-            max-width: 280px;
-        }
-
-        .terms-text a {
-            color: var(--text-primary);
-            text-decoration: none;
-        }
-
-        .terms-text a:hover {
-            text-decoration: underline;
-        }
-
-        /* Divider or */
-        .login-divider {
+        .google-divider-or {
             display: flex;
             align-items: center;
             width: 100%;
-            margin: 0.5rem 0;
             color: var(--text-secondary);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
+            text-transform: lowercase;
         }
 
-        .login-divider::before,
-        .login-divider::after {
+        .google-divider-or::before,
+        .google-divider-or::after {
             content: "";
             flex: 1;
             height: 1px;
             background: rgba(255, 255, 255, 0.08);
         }
 
-        .login-divider span {
-            padding: 0 0.75rem;
+        .google-divider-or span {
+            padding: 0 0.5rem;
         }
 
-        /* Email/Password Form */
-        .auth-form {
-            display: flex;
-            flex-direction: column;
+        /* Google Outline Input Fields */
+        .google-input-group {
+            position: relative;
             width: 100%;
-            gap: 1rem;
-            text-align: left;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-        }
-
-        .form-group label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .form-group input {
-            background: #2a2a2a;
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 0.65rem 0.85rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            outline: none;
+        .google-input {
+            width: 100%;
+            padding: 1rem 0.85rem;
+            background: transparent !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 4px !important;
+            color: var(--text-primary) !important;
+            font-size: 0.95rem !important;
+            outline: none !important;
+            transition: border-color 0.2s, box-shadow 0.2s;
             font-family: inherit;
-            transition: all 0.2s ease;
         }
 
-        .form-group input:focus {
-            border-color: rgba(255, 255, 255, 0.2);
-            background: #2f2f2f;
+        .google-input:focus {
+            border-color: #8ab4f8 !important; /* Material Blue in dark mode */
+            box-shadow: 0 0 0 1px #8ab4f8;
         }
 
-        .submit-btn {
-            background: var(--accent-user);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem;
+        .google-label {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
             font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            background: #252525; /* Match card background */
+            padding: 0 0.4rem;
+        }
+
+        .google-input:focus ~ .google-label,
+        .google-input:not(:placeholder-shown) ~ .google-label {
+            top: 0;
+            font-size: 0.75rem;
+            color: #8ab4f8;
+        }
+
+        .google-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.75rem;
             width: 100%;
-            transition: background 0.2s ease, transform 0.1s ease;
-            margin-top: 0.5rem;
         }
 
-        .submit-btn:hover {
-            background: #a24b2d;
+        .google-footer-link {
+            background: none;
+            border: none;
+            color: #8ab4f8;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
 
-        .submit-btn:active {
-            transform: scale(0.98);
+        .google-footer-link:hover {
+            background: rgba(138, 180, 248, 0.08);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 680px) {
+            .google-signin-container {
+                flex-direction: column;
+                padding: 1.5rem;
+                gap: 1.5rem;
+                max-width: 420px;
+            }
+            .google-logo-svg {
+                margin-bottom: 0.75rem;
+            }
+            .google-signin-title {
+                font-size: 1.6rem;
+            }
+            .google-signin-notes {
+                display: none;
+            }
         }
 
 
@@ -1258,44 +1395,79 @@
 
     <!-- Login Page -->
     <div class="login-page" id="loginPage">
-        <div class="login-card">
-            <div class="login-logo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2v20M17 5v14M22 9v6M7 5v14M2 9v6"/>
+        
+        <!-- WELCOME SCREEN (Chrome style) -->
+        <div class="welcome-container" id="welcomeScreen">
+            <div class="chrome-avatar-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <h1>Sirivela</h1>
-                <p class="login-tagline">Your intelligent voice assistant</p>
             </div>
             
-            <button class="google-btn" id="googleLoginBtn">
+            <h1 class="welcome-title">Set up your Sirivela profile</h1>
+            <p class="welcome-desc">Sign in to get your voice chats and more on all your devices</p>
+            
+            <div class="welcome-actions">
+                <button class="chrome-btn-primary" id="welcomeSignInBtn">Sign in</button>
+                <button class="chrome-btn-secondary" id="welcomeGuestBtn">Stay signed out</button>
+            </div>
+        </div>
+
+        <!-- SIGN IN SCREEN (Google style) -->
+        <div class="google-signin-container hidden" id="signInScreen">
+            <div class="google-signin-left">
                 <!-- Google "G" SVG Logo -->
-                <svg class="google-icon" viewBox="0 0 24 24">
+                <svg class="google-logo-svg" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Continue with Google
-            </button>
-
-            <div class="login-divider">
-                <span>or</span>
+                <h2 class="google-signin-title">Sign in to Sirivela</h2>
+                <p class="google-signin-subtitle">Use your Google Account</p>
+                
+                <div class="google-signin-notes">
+                    <p>Not your computer? Use guest login to sign in privately.</p>
+                </div>
             </div>
 
-            <!-- Email/Password Form -->
-            <form class="auth-form" id="authForm" onsubmit="handleAuthFormSubmit(event)">
-                <div class="form-group">
-                    <label for="authEmail">Email address</label>
-                    <input type="email" id="authEmail" placeholder="Enter your email" required />
-                </div>
-                <div class="form-group">
-                    <label for="authPassword">Password</label>
-                    <input type="password" id="authPassword" placeholder="Enter your password" required />
-                </div>
-                <button type="submit" class="submit-btn" id="authSubmitBtn">Continue</button>
-            </form>
+            <div class="google-signin-right">
+                <div class="google-card">
+                    <!-- Continue with Google (OAuth) -->
+                    <button class="google-btn-brand" id="googleLoginBtn">
+                        <svg class="google-icon" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Continue with Google
+                    </button>
 
-            <p class="terms-text">By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+                    <div class="google-divider-or">
+                        <span>or credentials</span>
+                    </div>
+
+                    <!-- Email/Password Form -->
+                    <form class="auth-form" id="authForm" onsubmit="handleAuthFormSubmit(event)">
+                        <div class="google-input-group">
+                            <input type="email" id="authEmail" class="google-input" placeholder=" " required />
+                            <label for="authEmail" class="google-label">Email address</label>
+                        </div>
+                        
+                        <div class="google-input-group" style="margin-top: 1rem;">
+                            <input type="password" id="authPassword" class="google-input" placeholder=" " required />
+                            <label for="authPassword" class="google-label">Password</label>
+                        </div>
+                        
+                        <div class="google-card-footer">
+                            <button type="button" class="google-footer-link" id="authBackBtn">Back</button>
+                            <button type="submit" class="chrome-btn-primary" style="margin: 0; width: auto; padding: 0.65rem 1.75rem;" id="authSubmitBtn">Next</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1503,21 +1675,11 @@
         // Auth DOM Elements
         const googleLoginBtn = document.getElementById('googleLoginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-
-        // State Variables
-        let currentUser = null;
-        let currentSessionId = null;
-        let isListening = false;
-        let isSpeaking = false;
-        let isProcessing = false;
-        let recognition = null;
-        let speechSynth = window.speechSynthesis;
-        let speechUtterance = null;
-        let voices = [];
-        let canvasAnimationId = null;
-        let audioCtx = null;
-        let currentVoice = null;
-        let finalTranscriptText = '';
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const signInScreen = document.getElementById('signInScreen');
+        const welcomeSignInBtn = document.getElementById('welcomeSignInBtn');
+        const welcomeGuestBtn = document.getElementById('welcomeGuestBtn');
+        const authBackBtn = document.getElementById('authBackBtn');
 
         // Check Auth Status
         async function checkAuthStatus() {
@@ -1536,6 +1698,8 @@
                 console.error("Auth check failed:", e);
             }
             document.getElementById('loginPage').classList.remove('hidden');
+            welcomeScreen.classList.remove('hidden');
+            signInScreen.classList.add('hidden');
             return false;
         }
 
@@ -1593,6 +1757,29 @@
             }
         }
 
+        async function handleGuestLogin() {
+            try {
+                const response = await fetch('/auth/login_guest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    updateUserProfileUI(currentUser);
+                    document.getElementById('loginPage').classList.add('hidden');
+                    playChime('success');
+                    await initAppFlow();
+                } else {
+                    showToast("Guest login failed.");
+                }
+            } catch (err) {
+                console.error("Guest login failed:", err);
+                showToast("Server connection error.");
+            }
+        }
+
         // Google Redirect-Based Auth Trigger
         function initGoogleLogin() {
             if (!GOOGLE_CLIENT_ID) {
@@ -1611,6 +1798,8 @@
                 if (response.ok) {
                     currentUser = null;
                     document.getElementById('loginPage').classList.remove('hidden');
+                    welcomeScreen.classList.remove('hidden');
+                    signInScreen.classList.add('hidden');
                     playChime('success');
                     messagesList.innerHTML = '';
                     currentSessionId = null;
@@ -2346,6 +2535,15 @@
         // Auth Event Listeners
         googleLoginBtn.addEventListener('click', initGoogleLogin);
         logoutBtn.addEventListener('click', handleLogout);
+        welcomeSignInBtn.addEventListener('click', () => {
+            welcomeScreen.classList.add('hidden');
+            signInScreen.classList.remove('hidden');
+        });
+        authBackBtn.addEventListener('click', () => {
+            signInScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        });
+        welcomeGuestBtn.addEventListener('click', handleGuestLogin);
         
         // Start Wave drawing
         drawCanvasWaves();
