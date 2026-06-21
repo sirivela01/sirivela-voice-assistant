@@ -10,6 +10,7 @@ from flask_cors import CORS
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+import rag_helper
 
 # Load env variables from .env relative to the script's directory
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -29,6 +30,10 @@ client = None
 if api_key and api_key != "your_actual_gemini_api_key_here":
     # Google GenAI client automatically uses the GEMINI_API_KEY environment variable
     client = genai.Client()
+    try:
+        rag_helper.init_rag(client)
+    except Exception as e:
+        print(f"RAG Error: Failed to initialize RAG on startup: {e}")
 else:
     print(f"WARNING: GEMINI_API_KEY is not configured or is set to placeholder. Value: {api_key!r}")
 
@@ -298,6 +303,10 @@ def ask():
             os.environ["GEMINI_API_KEY"] = key
             client = genai.Client()
             print(f"DEBUG /ask: Client initialized: {client}")
+            try:
+                rag_helper.init_rag(client)
+            except Exception as e:
+                print(f"RAG Error: Failed to initialize RAG on dynamic client load: {e}")
         else:
             print("DEBUG /ask: Client not initialized because key was empty or placeholder")
 
@@ -317,6 +326,26 @@ def ask():
         local_time = data.get('local_time')
         timezone = data.get('timezone')
         session_id = data.get('session_id')
+
+        # Auto-index any new or modified RAG documents
+        try:
+            rag_helper.init_rag(client)
+        except Exception as ex:
+            print(f"RAG Warning: Auto-indexing documents failed: {ex}")
+
+        # Retrieve relevant grounding context
+        rag_context = ""
+        sources = []
+        try:
+            results = rag_helper.get_relevant_context(client, user_message, num_results=3)
+            if results:
+                rag_context = "\n\nGrounding Context from local documents:\n"
+                for r in results:
+                    rag_context += f"- From [{r['filename']}]: {r['text']}\n"
+                    if r['filename'] not in sources:
+                        sources.append(r['filename'])
+        except Exception as ex:
+            print(f"RAG Warning: Context retrieval failed: {ex}")
 
         # Load existing sessions
         history_data = load_history_data()
@@ -356,6 +385,14 @@ def ask():
                 f"Refer to this local time instead of UTC or any other reference if the user asks about the time, date, day of the week, or relative time references (like today, yesterday, tomorrow, etc.)."
             )
 
+        if rag_context:
+            system_instruction += (
+                f"{rag_context}\n"
+                f"CRITICAL: The grounding context above contains information directly from the user's uploaded local documents. "
+                f"Use this grounding context to answer the user's question. If the answer is found in the context, base your answer on it. "
+                f"If the context does not contain the answer, you may answer using your general knowledge or search tool."
+            )
+
         # Call Gemini API
         # Model: gemini-2.5-flash (optimized for speed and low latency, has free tier)
         response = client.models.generate_content(
@@ -379,7 +416,8 @@ def ask():
         session["messages"].append({
             'sender': 'assistant',
             'text': assistant_text,
-            'timestamp': datetime.now().strftime('%H:%M:%S')
+            'timestamp': datetime.now().strftime('%H:%M:%S'),
+            'sources': sources
         })
 
         save_history_data(history_data)
@@ -387,7 +425,8 @@ def ask():
         return jsonify({
             'response': assistant_text,
             'session_id': session_id,
-            'session_title': session["title"]
+            'session_title': session["title"],
+            'sources': sources
         })
     except Exception as e:
         print(f"Error calling Gemini API: {e}")

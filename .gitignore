@@ -15,5 +15,6 @@ __pycache__/
 # Local conversation storage
 history.json
 users.json
+vector_store.json
 pinggy.log
 

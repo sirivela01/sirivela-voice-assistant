@@ -1,0 +1,1 @@
+SIRIVELA AI is running a custom Retrieval-Augmented Generation (RAG) connector. Its index database is saved locally in voice-assistant/vector_store.json. Yashwanth's favorite drink is iced mocha with oat milk.

@@ -3,3 +3,4 @@ google-genai
 python-dotenv>=1.0.0
 flask-cors>=4.0.0
 gunicorn>=21.2.0
+pypdf>=4.0.0
