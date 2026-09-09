@@ -1687,6 +1687,19 @@
         // Inject Google Client ID from Python template rendering
         const GOOGLE_CLIENT_ID = "{{ google_client_id }}";
 
+        // Safe JSON Fetch helper that prevents HTML parsing crashes on 500/502/504 gateway errors
+        async function safeFetchJson(url, options = {}) {
+            const response = await fetch(url, options);
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error(`Non-JSON response from ${url} (status ${response.status}):`, text);
+                throw new Error(`Server returned status ${response.status}. The server may be warming up or restarting. Please try again in a few seconds.`);
+            }
+            const data = await response.json();
+            return { ok: response.ok, status: response.status, data };
+        }
+
         // DOM Elements
         const statusBadge = document.getElementById('statusBadge');
         const messagesList = document.getElementById('messagesList');
@@ -2084,7 +2097,7 @@
             sendBtn.classList.remove('active');
 
             try {
-                const response = await fetch('/ask', {
+                const { ok, data } = await safeFetchJson('/ask', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2096,10 +2109,8 @@
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                     })
                 });
-
-                const data = await response.json();
                 
-                if (response.ok) {
+                if (ok) {
                     playChime('success');
                     
                     if (!currentSessionId || currentSessionId !== data.session_id) {

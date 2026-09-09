@@ -484,6 +484,14 @@ def get_image():
         'images': fallback_images
     })
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
+
+@app.errorhandler(404)
+def not_found_error(e):
+    return jsonify({'error': 'Endpoint not found'}), 404
+
 if __name__ == '__main__':
     # Run the server on all network interfaces
     app.run(debug=True, host='0.0.0.0', port=5000)
